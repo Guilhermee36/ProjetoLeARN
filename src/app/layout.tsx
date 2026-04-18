@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google"; // Trocamos Geist por Inter para evitar o erro
-import "./globals.css";
-import { cn } from "@/lib/supabase/utils"; // Garanta que o arquivo src/lib/utils.ts exista
+import ""; // Certifique-se de que o arquivo src/app/globals.css exista
+import { cn } from "@/lib/utils"; // Garanta que o arquivo src/lib/utils.ts exista
 
 const inter = Inter({
   subsets: ["latin"],
