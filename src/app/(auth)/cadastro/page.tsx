@@ -24,6 +24,7 @@ export default function CadastroPage() {
     setLoading(true)
     setError('')
 
+    // O código atualizado começa aqui
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -31,9 +32,11 @@ export default function CadastroPage() {
         data: {
           full_name: fullName,
           role,
+          course: role === 'student' ? course : null, // <-- Adicionamos esta linha
         },
       },
     })
+    // O código atualizado termina aqui
 
     if (error) {
       setError(error.message)
