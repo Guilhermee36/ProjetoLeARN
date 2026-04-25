@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { MapPin, Clock, User, Calendar, DollarSign, BookOpen } from 'lucide-react'
 import CategoryBadge from '@/components/CategoryBadge'
 import BotaoInscrever from '@/components/BotaoInscrever'
+import CopyId from '@/components/CopyId'
 
 type Props = { params: { id: string } }
 
@@ -172,6 +173,12 @@ export default async function DetalhesBolsaPage({ params }: Props) {
           Não há vagas abertas no momento para este projeto.
         </div>
       )}
+
+      {/* ID visível para professor copiar e usar em notificações */}
+        {profile?.role === 'teacher' && (
+            <CopyId id={project.id} label="ID do Projeto" />
+        )}
+
 
       {/* Professor vendo o próprio projeto */}
       {profile?.role === 'teacher' && (

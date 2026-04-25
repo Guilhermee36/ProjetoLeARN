@@ -12,17 +12,20 @@ export default async function NotificacoesPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, full_name')
     .eq('id', user.id)
     .single()
 
+  const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
+
+  // Todos veem todas as notificações
   const { data: notifications } = await supabase
     .from('notifications')
     .select('*')
-    .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const unreadCount = notifications?.filter(n => !n.is_read).length ?? 0
+  // Conta não lidas DO usuário atual (para o badge pessoal)
+  const myUnread = notifications?.filter(n => n.user_id === user.id && !n.is_read).length ?? 0
 
   const refLink = (n: any) => {
     if (n.reference_type === 'edict' && n.reference_id) return `/editais/${n.reference_id}`
@@ -42,14 +45,14 @@ export default async function NotificacoesPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Notificações</h1>
           <p className="text-slate-500 mt-1">
-            {unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}` : 'Tudo em dia!'}
+            {notifications?.length
+              ? `${notifications.length} notificação${notifications.length !== 1 ? 'ões' : ''} no sistema`
+              : 'Nenhuma notificação ainda.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {(profile?.role === 'teacher' || profile?.role === 'admin') && (
-            <CriarNotificacao />
-          )}
-          {unreadCount > 0 && <MarcarLidas userId={user.id} />}
+          {isTeacher && <CriarNotificacao authorName={profile?.full_name ?? 'Professor'} />}
+          {myUnread > 0 && <MarcarLidas userId={user.id} />}
         </div>
       </div>
 
@@ -57,16 +60,19 @@ export default async function NotificacoesPage() {
         <div className="bg-white rounded-xl border border-slate-200 py-16 text-center">
           <div className="text-4xl mb-3">🔔</div>
           <p className="text-slate-500">Nenhuma notificação por enquanto.</p>
+          {isTeacher && <p className="text-sm text-slate-400 mt-1">Crie a primeira notificação para os alunos.</p>}
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n: any) => {
             const link = refLink(n)
+            const isMyOwn = n.user_id === user.id
+            const isUnread = isMyOwn && !n.is_read
             return (
               <div
                 key={n.id}
                 className={`bg-white rounded-xl border p-4 flex items-start gap-3 transition-colors ${
-                  !n.is_read ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200'
+                  isUnread ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200'
                 }`}
               >
                 <div className="text-xl shrink-0 mt-0.5">
@@ -74,6 +80,14 @@ export default async function NotificacoesPage() {
                 </div>
                 <div className="flex-1 min-w-0 space-y-1">
                   <p className="text-sm text-slate-700">{n.message}</p>
+
+                  {/* Autor da notificação */}
+                  {n.created_by_name && (
+                    <p className="text-xs text-slate-400">
+                      Por <span className="font-medium text-slate-500">{n.created_by_name}</span>
+                    </p>
+                  )}
+
                   {n.reference_title && link && (
                     <Link href={link} className="text-xs text-blue-600 hover:underline">
                       {n.reference_title} →
@@ -86,7 +100,7 @@ export default async function NotificacoesPage() {
                     })}
                   </p>
                 </div>
-                {!n.is_read && (
+                {isUnread && (
                   <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
                 )}
               </div>
