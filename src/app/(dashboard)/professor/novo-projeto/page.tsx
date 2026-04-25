@@ -55,66 +55,59 @@ export default function NovoprojetoPage() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault()
-  setLoading(true)
-  setError('')
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) { setError('Não autenticado.'); setLoading(false); return }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setError('Não autenticado.'); setLoading(false); return }
 
-  const scheduleText = scheduleDays.length > 0 && scheduleStart && scheduleEnd
-    ? `${scheduleDays.join(', ')}, ${scheduleStart}–${scheduleEnd}`
-    : null
+    const scheduleText = scheduleDays.length > 0 && scheduleStart && scheduleEnd
+      ? `${scheduleDays.join(', ')}, ${scheduleStart}–${scheduleEnd}`
+      : null
 
-  const { data: project, error: projectError } = await supabase
-    .from('projects')
-    .insert({
-      title,
-      description,
-      category,
-      location,
-      schedule: scheduleText,
-      teacher_id: user.id,
-      status: 'active',
-    })
-    .select()
-    .single()
+    // 1. Cria o projeto
+    const { data: project, error: projectError } = await supabase
+      .from('projects')
+      .insert({
+        title,
+        description,
+        category,
+        location,
+        schedule: scheduleText,
+        teacher_id: user.id,
+        status: 'active',
+      })
+      .select()
+      .single()
 
-  if (projectError || !project) {
-    setError('Erro ao criar projeto. Tente novamente.')
-    setLoading(false)
-    return
-  }
-
-  const slotsToInsert = slots
-    .filter(s => s.weekly_hours || s.monthly_value)
-    .map(s => ({
-      project_id: project.id,
-      slot_code: s.slot_code || null,
-      weekly_hours: s.weekly_hours ? parseInt(s.weekly_hours) : null,
-      monthly_value: s.monthly_value ? parseFloat(s.monthly_value) : null,
-      start_date: s.start_date || null,
-      end_date: s.end_date || null,
-      status: 'open' as const,
-      is_open: true,
-    }))
-
-  if (slotsToInsert.length > 0) {
-    const { error: slotError } = await supabase
-      .from('scholarship_slots')
-      .insert(slotsToInsert)
-
-    if (slotError) {
-      setError(`Projeto criado mas erro nas vagas: ${slotError.message}`)
+    if (projectError || !project) {
+      setError('Erro ao criar projeto. Tente novamente.')
       setLoading(false)
       return
     }
-  }
 
-  // ← só redireciona DEPOIS que tudo foi salvo com sucesso
-  router.push('/professor/projetos')
-  router.refresh()
-}
+    // 2. Cria as vagas
+    const slotsToInsert = slots
+      .filter(s => s.weekly_hours || s.monthly_value)
+      .map(s => ({
+        project_id: project.id,
+        slot_code: s.slot_code || null,
+        weekly_hours: s.weekly_hours ? parseInt(s.weekly_hours) : null,
+        monthly_value: s.monthly_value ? parseFloat(s.monthly_value) : null,
+        start_date: s.start_date || null,
+        end_date: s.end_date || null,
+        status: 'open',
+        is_open: true,
+      }))
+
+    if (slotsToInsert.length > 0) {
+      await supabase.from('scholarship_slots').insert(slotsToInsert)
+    }
+
+    router.push('/professor/projetos')
+    router.refresh()
+  }
 
   const categories = [
     { value: 'research', label: '🔬 Pesquisa' },
@@ -166,10 +159,11 @@ export default function NovoprojetoPage() {
                   key={cat.value}
                   type="button"
                   onClick={() => setCategory(cat.value as any)}
-                  className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${category === cat.value
+                  className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                    category === cat.value
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
                       : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
+                  }`}
                 >
                   {cat.label}
                 </button>
@@ -200,10 +194,11 @@ export default function NovoprojetoPage() {
                       prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
                     )
                   }
-                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${scheduleDays.includes(dia)
+                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${
+                    scheduleDays.includes(dia)
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
                       : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
+                  }`}
                 >
                   {dia}
                 </button>
@@ -218,9 +213,14 @@ export default function NovoprojetoPage() {
               <select
                 id="scheduleStart"
                 value={scheduleStart}
-                onChange={e => setScheduleStart(e.target.value)}
-                title="Horário de início"
+                onChange={e => {
+                  setScheduleStart(e.target.value)
+                  if (scheduleEnd && scheduleEnd <= e.target.value) {
+                    setScheduleEnd('')
+                  }
+                }}
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title="Horário de início"
               >
                 <option value="">Selecione</option>
                 {HORARIOS.map(h => <option key={h} value={h}>{h}</option>)}
@@ -232,9 +232,8 @@ export default function NovoprojetoPage() {
                 id="scheduleEnd"
                 value={scheduleEnd}
                 onChange={e => setScheduleEnd(e.target.value)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 title="Horário de término"
-                disabled={!scheduleStart}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <option value="">Selecione</option>
                 {HORARIOS.filter(h => h > scheduleStart).map(h => <option key={h} value={h}>{h}</option>)}
