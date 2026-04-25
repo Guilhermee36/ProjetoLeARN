@@ -55,60 +55,66 @@ export default function NovoprojetoPage() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  e.preventDefault()
+  setLoading(true)
+  setError('')
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Não autenticado.'); setLoading(false); return }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { setError('Não autenticado.'); setLoading(false); return }
 
-    const scheduleText = scheduleDays.length > 0 && scheduleStart && scheduleEnd
-      ? `${scheduleDays.join(', ')}, ${scheduleStart}–${scheduleEnd}`
-      : null
+  const scheduleText = scheduleDays.length > 0 && scheduleStart && scheduleEnd
+    ? `${scheduleDays.join(', ')}, ${scheduleStart}–${scheduleEnd}`
+    : null
 
-    // 1. Cria o projeto
-    const { data: project, error: projectError } = await supabase
-      .from('projects')
-      .insert({
-        title,
-        description,
-        category,
-        location,
-        schedule: scheduleText,
-        teacher_id: user.id,
-        status: 'active',
-      })
-      .select()
-      .single()
+  const { data: project, error: projectError } = await supabase
+    .from('projects')
+    .insert({
+      title,
+      description,
+      category,
+      location,
+      schedule: scheduleText,
+      teacher_id: user.id,
+      status: 'active',
+    })
+    .select()
+    .single()
 
-    if (projectError || !project) {
-      setError('Erro ao criar projeto. Tente novamente.')
+  if (projectError || !project) {
+    setError('Erro ao criar projeto. Tente novamente.')
+    setLoading(false)
+    return
+  }
+
+  const slotsToInsert = slots
+    .filter(s => s.weekly_hours || s.monthly_value)
+    .map(s => ({
+      project_id: project.id,
+      slot_code: s.slot_code || null,
+      weekly_hours: s.weekly_hours ? parseInt(s.weekly_hours) : null,
+      monthly_value: s.monthly_value ? parseFloat(s.monthly_value) : null,
+      start_date: s.start_date || null,
+      end_date: s.end_date || null,
+      status: 'open' as const,
+      is_open: true,
+    }))
+
+  if (slotsToInsert.length > 0) {
+    const { error: slotError } = await supabase
+      .from('scholarship_slots')
+      .insert(slotsToInsert)
+
+    if (slotError) {
+      setError(`Projeto criado mas erro nas vagas: ${slotError.message}`)
       setLoading(false)
       return
     }
-
-    // 2. Cria as vagas
-    // Substitua o map de slotsToInsert por:
-    const slotsToInsert = slots
-      .filter(s => s.weekly_hours || s.monthly_value)
-      .map(s => ({
-        project_id: project.id,
-        slot_code: s.slot_code || null,
-        weekly_hours: s.weekly_hours ? parseInt(s.weekly_hours) : null,
-        monthly_value: s.monthly_value ? parseFloat(s.monthly_value) : null,
-        start_date: s.start_date || null,
-        end_date: s.end_date || null,
-        status: 'open' as const,
-        is_open: true,         
-      }))
-
-    if (slotsToInsert.length > 0) {
-      await supabase.from('scholarship_slots').insert(slotsToInsert)
-    }
-
-    router.push('/professor/projetos')
-    router.refresh()
   }
+
+  // ← só redireciona DEPOIS que tudo foi salvo com sucesso
+  router.push('/professor/projetos')
+  router.refresh()
+}
 
   const categories = [
     { value: 'research', label: '🔬 Pesquisa' },
