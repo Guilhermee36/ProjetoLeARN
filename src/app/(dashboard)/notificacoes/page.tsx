@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import MarcarLidas from '@/components/MarcarLidas'
 import CriarNotificacao from '@/components/CriarNotificacao'
 
 export default async function NotificacoesPage() {
@@ -18,14 +17,12 @@ export default async function NotificacoesPage() {
 
   const isTeacher = profile?.role === 'teacher' || profile?.role === 'admin'
 
-  // Todos veem todas as notificações
+  // Busca notificações globais (user_id null) — sem duplicatas
   const { data: notifications } = await supabase
     .from('notifications')
     .select('*')
+    .is('user_id', null)
     .order('created_at', { ascending: false })
-
-  // Conta não lidas DO usuário atual (para o badge pessoal)
-  const myUnread = notifications?.filter(n => n.user_id === user.id && !n.is_read).length ?? 0
 
   const refLink = (n: any) => {
     if (n.reference_type === 'edict' && n.reference_id) return `/editais/${n.reference_id}`
@@ -46,48 +43,37 @@ export default async function NotificacoesPage() {
           <h1 className="text-2xl font-bold text-slate-800">Notificações</h1>
           <p className="text-slate-500 mt-1">
             {notifications?.length
-              ? `${notifications.length} notificação${notifications.length !== 1 ? 'ões' : ''} no sistema`
+              ? `${notifications.length} publicação${notifications.length !== 1 ? 'ões' : ''}`
               : 'Nenhuma notificação ainda.'}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {isTeacher && <CriarNotificacao authorName={profile?.full_name ?? 'Professor'} />}
-          {myUnread > 0 && <MarcarLidas userId={user.id} />}
-        </div>
+        {isTeacher && (
+          <CriarNotificacao authorName={profile?.full_name ?? 'Professor'} />
+        )}
       </div>
 
       {!notifications || notifications.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 py-16 text-center">
           <div className="text-4xl mb-3">🔔</div>
           <p className="text-slate-500">Nenhuma notificação por enquanto.</p>
-          {isTeacher && <p className="text-sm text-slate-400 mt-1">Crie a primeira notificação para os alunos.</p>}
+          {isTeacher && <p className="text-sm text-slate-400 mt-1">Crie a primeira notificação.</p>}
         </div>
       ) : (
         <div className="space-y-2">
           {notifications.map((n: any) => {
             const link = refLink(n)
-            const isMyOwn = n.user_id === user.id
-            const isUnread = isMyOwn && !n.is_read
             return (
-              <div
-                key={n.id}
-                className={`bg-white rounded-xl border p-4 flex items-start gap-3 transition-colors ${
-                  isUnread ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200'
-                }`}
-              >
+              <div key={n.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-start gap-3">
                 <div className="text-xl shrink-0 mt-0.5">
                   {typeIcon[n.reference_type ?? 'general'] ?? '🔔'}
                 </div>
                 <div className="flex-1 min-w-0 space-y-1">
                   <p className="text-sm text-slate-700">{n.message}</p>
-
-                  {/* Autor da notificação */}
                   {n.created_by_name && (
                     <p className="text-xs text-slate-400">
                       Por <span className="font-medium text-slate-500">{n.created_by_name}</span>
                     </p>
                   )}
-
                   {n.reference_title && link && (
                     <Link href={link} className="text-xs text-blue-600 hover:underline">
                       {n.reference_title} →
@@ -100,9 +86,6 @@ export default async function NotificacoesPage() {
                     })}
                   </p>
                 </div>
-                {isUnread && (
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                )}
               </div>
             )
           })}
