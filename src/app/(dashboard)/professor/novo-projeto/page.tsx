@@ -16,6 +16,15 @@ type Slot = {
   end_date: string
 }
 
+const DIAS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado']
+const HORARIOS = [
+  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30',
+  '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
+  '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
+  '19:00', '19:30', '20:00', '20:30', '21:00', '21:30',
+]
+
 export default function NovoprojetoPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -24,7 +33,9 @@ export default function NovoprojetoPage() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<'teaching' | 'research' | 'extension'>('research')
   const [location, setLocation] = useState('')
-  const [schedule, setSchedule] = useState('')
+  const [scheduleDays, setScheduleDays] = useState<string[]>([])
+  const [scheduleStart, setScheduleStart] = useState('')
+  const [scheduleEnd, setScheduleEnd] = useState('')
   const [slots, setSlots] = useState<Slot[]>([
     { slot_code: '', weekly_hours: '', monthly_value: '', start_date: '', end_date: '' }
   ])
@@ -51,6 +62,10 @@ export default function NovoprojetoPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Não autenticado.'); setLoading(false); return }
 
+    const scheduleText = scheduleDays.length > 0 && scheduleStart && scheduleEnd
+      ? `${scheduleDays.join(', ')}, ${scheduleStart}–${scheduleEnd}`
+      : null
+
     // 1. Cria o projeto
     const { data: project, error: projectError } = await supabase
       .from('projects')
@@ -59,7 +74,7 @@ export default function NovoprojetoPage() {
         description,
         category,
         location,
-        schedule,
+        schedule: scheduleText,
         teacher_id: user.id,
         status: 'active',
       })
@@ -73,6 +88,7 @@ export default function NovoprojetoPage() {
     }
 
     // 2. Cria as vagas
+    // Substitua o map de slotsToInsert por:
     const slotsToInsert = slots
       .filter(s => s.weekly_hours || s.monthly_value)
       .map(s => ({
@@ -82,8 +98,8 @@ export default function NovoprojetoPage() {
         monthly_value: s.monthly_value ? parseFloat(s.monthly_value) : null,
         start_date: s.start_date || null,
         end_date: s.end_date || null,
-        status: 'open',
-        is_open: true,
+        status: 'open' as const,
+        is_open: true,         
       }))
 
     if (slotsToInsert.length > 0) {
@@ -144,11 +160,10 @@ export default function NovoprojetoPage() {
                   key={cat.value}
                   type="button"
                   onClick={() => setCategory(cat.value as any)}
-                  className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                    category === cat.value
+                  className={`p-3 rounded-lg border-2 text-sm font-medium transition-all ${category === cat.value
                       ? 'border-blue-600 bg-blue-50 text-blue-700'
                       : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                  }`}
+                    }`}
                 >
                   {cat.label}
                 </button>
@@ -156,26 +171,77 @@ export default function NovoprojetoPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="location">Local das atividades</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={e => setLocation(e.target.value)}
-                placeholder="Ex: Lab. de Informática"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="schedule">Horário</Label>
-              <Input
-                id="schedule"
-                value={schedule}
-                onChange={e => setSchedule(e.target.value)}
-                placeholder="Ex: Seg e Qua, 14h–16h"
-              />
+          <div className="space-y-2">
+            <Label htmlFor="location">Local das atividades</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              placeholder="Ex: Lab. de Informática"
+            />
+          </div>
+
+          {/* Dias da semana */}
+          <div className="space-y-2">
+            <Label>Dias de atividade</Label>
+            <div className="flex flex-wrap gap-2">
+              {DIAS.map(dia => (
+                <button
+                  key={dia}
+                  type="button"
+                  onClick={() =>
+                    setScheduleDays(prev =>
+                      prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
+                    )
+                  }
+                  className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all ${scheduleDays.includes(dia)
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-slate-200 text-slate-600 hover:border-slate-300'
+                    }`}
+                >
+                  {dia}
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Horário início/fim */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="scheduleStart">Horário de início</Label>
+              <select
+                id="scheduleStart"
+                value={scheduleStart}
+                onChange={e => setScheduleStart(e.target.value)}
+                title="Horário de início"
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="">Selecione</option>
+                {HORARIOS.map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="scheduleEnd">Horário de término</Label>
+              <select
+                id="scheduleEnd"
+                value={scheduleEnd}
+                onChange={e => setScheduleEnd(e.target.value)}
+                title="Horário de término"
+                disabled={!scheduleStart}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Selecione</option>
+                {HORARIOS.filter(h => h > scheduleStart).map(h => <option key={h} value={h}>{h}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Preview do horário */}
+          {scheduleDays.length > 0 && scheduleStart && scheduleEnd && (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 text-sm text-blue-700">
+              📅 {scheduleDays.join(', ')}, {scheduleStart}–{scheduleEnd}
+            </div>
+          )}
         </div>
 
         {/* Vagas */}
