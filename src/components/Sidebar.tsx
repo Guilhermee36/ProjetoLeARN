@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { BarChart2 } from 'lucide-react'  
 import { createClient } from '@/lib/supabase/client'
 import {
   BookOpen,
@@ -32,6 +33,7 @@ const teacherLinks = [
   { href: '/professor/projetos', label: 'Meus Projetos', icon: LayoutDashboard },
   { href: '/professor/novo-projeto', label: 'Novo Projeto', icon: PlusCircle },
   { href: '/editais', label: 'Editais', icon: FileText },
+  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/notificacoes', label: 'Notificações', icon: Bell },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]
