@@ -21,12 +21,11 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar role={profile?.role ?? 'student'} userName={profile?.full_name ?? ''} />
-      {/* 
-        Desktop: ml-64 para não sobrepor a sidebar fixa
-        Mobile: sem margin (sidebar vira drawer por cima)
-        pt-16 no mobile para não sobrepor o botão hambúrguer
+      {/*
+        Desktop: ml-64 para não sobrepor sidebar fixa
+        Mobile: sem margin, pt-14 para compensar a topbar fixa
       */}
-      <main className="flex-1 md:ml-64 p-4 md:p-8 pt-16 md:pt-8">
+      <main className="flex-1 md:ml-64 pt-14 md:pt-0 p-4 md:p-8 min-w-0">
         {children}
       </main>
     </div>
