@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart2, Menu, X } from 'lucide-react'
+import { BarChart2, X, Menu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import {
   BookOpen,
@@ -50,30 +50,29 @@ export default function Sidebar({ role, userName }: Props) {
     window.location.href = '/login'
   }
 
-  const sidebarContent = (
+  const sidebarInner = (
     <>
       {/* Logo */}
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+      <div className="p-5 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="text-2xl font-bold text-blue-700">LeARN</h1>
-          <p className="text-xs text-slate-500 mt-1">IFRS — Campus Sertão</p>
+          <h1 className="text-xl font-bold text-blue-700" style={{ fontFamily: 'Syne, sans-serif' }}>
+            LeARN
+          </h1>
+          <p className="text-xs text-slate-400 mt-0.5">IFRS — Campus Sertão</p>
         </div>
-        {/* Botão fechar no mobile */}
         <button
-          type="button"
-          className="md:hidden text-slate-400 hover:text-slate-600"
+          className="md:hidden text-slate-400 hover:text-slate-600 p-1"
           onClick={() => setMobileOpen(false)}
           aria-label="Fechar menu"
-          title="Fechar menu"
         >
-          <X size={20} />
+          <X size={18} />
         </button>
       </div>
 
       {/* Info do usuário */}
-      <div className="px-4 py-3 border-b border-slate-100">
+      <div className="px-4 py-3 border-b border-slate-100 flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
             {userName?.charAt(0)?.toUpperCase() ?? '?'}
           </div>
           <div className="min-w-0">
@@ -92,10 +91,9 @@ export default function Sidebar({ role, userName }: Props) {
       </div>
 
       {/* Links de navegação */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {links.map(({ href, label, icon: Icon }) => {
-          const active =
-            pathname === href || pathname?.startsWith(href + '/')
+          const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
@@ -107,7 +105,7 @@ export default function Sidebar({ role, userName }: Props) {
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-800'
               }`}
             >
-              <Icon size={18} />
+              <Icon size={16} className={active ? 'text-blue-600' : 'text-slate-400'} />
               {label}
             </Link>
           )
@@ -115,12 +113,12 @@ export default function Sidebar({ role, userName }: Props) {
       </nav>
 
       {/* Logout */}
-      <div className="p-3 border-t border-slate-100">
+      <div className="p-3 border-t border-slate-100 flex-shrink-0">
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 transition-colors"
         >
-          <LogOut size={18} />
+          <LogOut size={16} className="text-slate-400" />
           Sair
         </button>
       </div>
@@ -129,35 +127,40 @@ export default function Sidebar({ role, userName }: Props) {
 
   return (
     <>
-      {/* Botão hambúrguer — só aparece no mobile */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-white border border-slate-200 rounded-lg p-2 shadow-sm"
-        onClick={() => setMobileOpen(true)}
-        aria-label="Abrir menu"
-      >
-        <Menu size={20} className="text-slate-600" />
-      </button>
+      {/* ── Topbar mobile — substituiu o botão flutuante ── */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b border-slate-200 z-40 flex items-center px-4 gap-3">
+        <button
+          onClick={() => setMobileOpen(true)}
+          aria-label="Abrir menu"
+          className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 flex-shrink-0"
+        >
+          <Menu size={18} />
+        </button>
+        <span className="font-bold text-base text-blue-700" style={{ fontFamily: 'Syne, sans-serif' }}>
+          LeARN
+        </span>
+      </div>
 
-      {/* Overlay escuro no mobile */}
+      {/* ── Overlay mobile ── */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/40 z-30"
+          className="md:hidden fixed inset-0 bg-black/40 z-40"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar desktop: sempre visível */}
-      <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 flex-col z-10">
-        {sidebarContent}
+      {/* ── Sidebar desktop: sempre visível ── */}
+      <aside className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-white border-r border-slate-200 flex-col z-30">
+        {sidebarInner}
       </aside>
 
-      {/* Sidebar mobile: drawer deslizante */}
+      {/* ── Sidebar mobile: drawer ── */}
       <aside
-        className={`md:hidden fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 flex flex-col z-40 transition-transform duration-300 ${
+        className={`md:hidden fixed left-0 top-0 h-full w-72 bg-white border-r border-slate-200 flex flex-col z-50 transition-transform duration-300 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {sidebarContent}
+        {sidebarInner}
       </aside>
     </>
   )
