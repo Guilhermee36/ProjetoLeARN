@@ -24,12 +24,14 @@ export default async function CandidaturasPage({ params }: Props) {
       id,
       status,
       applied_at,
+      student_id,
       profiles:student_id (
         id,
         full_name,
         course
       ),
       scholarship_slots (
+        id,
         slot_code,
         weekly_hours,
         monthly_value
@@ -94,7 +96,11 @@ export default async function CandidaturasPage({ params }: Props) {
               </div>
 
               {app.status === 'pending' && (
-                <AvaliarCandidatura applicationId={app.id} />
+                <AvaliarCandidatura
+                  applicationId={app.id}
+                  slotId={app.scholarship_slots?.id ?? null}
+                  studentId={app.student_id}
+                />
               )}
             </div>
           ))}
