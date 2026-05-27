@@ -1,214 +1,159 @@
-// src/app/page.tsx
 import Link from 'next/link'
 
-export default function SplashPage() {
+export default function Home() {
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: '#f8fafc',
-      fontFamily: "'DM Sans', sans-serif",
-    }}>
-      {/* Google Fonts via next/head não funciona aqui — use link direto */}
-      <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap"
-        rel="stylesheet"
-      />
-
-      {/* Nav */}
-      <nav style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '20px 48px',
-        borderBottom: '1px solid #e2e8f0',
-        background: 'white',
-      }}>
-        <span style={{
-          fontFamily: "'Syne', sans-serif",
-          fontSize: '22px',
-          fontWeight: 800,
-          color: '#1e40af',
-        }}>
-          LeARN
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Link href="/login" style={{
-            fontSize: '14px', fontWeight: 500, color: '#64748b',
-            textDecoration: 'none', padding: '8px 16px', borderRadius: '8px',
-          }}>
-            Entrar
-          </Link>
-          <Link href="/cadastro" style={{
-            fontSize: '14px', fontWeight: 500, color: 'white',
-            background: '#1d4ed8', textDecoration: 'none',
-            padding: '8px 20px', borderRadius: '8px',
-          }}>
-            Criar conta
-          </Link>
+    <div className="min-h-screen bg-[#f8fafc] overflow-x-hidden">
+      {/* ── Navbar ── */}
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-blue-700 flex items-center justify-center">
+              <span className="text-white font-bold text-xs" style={{ fontFamily: 'Syne, sans-serif' }}>Le</span>
+            </div>
+            <span className="font-bold text-lg text-slate-900" style={{ fontFamily: 'Syne, sans-serif' }}>
+              Le<span className="text-blue-700">ARN</span>
+            </span>
+          </div>
+          <nav className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors px-3 py-1.5"
+            >
+              Entrar
+            </Link>
+            <Link
+              href="/cadastro"
+              className="text-sm font-medium bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Criar conta
+            </Link>
+          </nav>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero */}
-      <section style={{
-        flex: 1,
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '80px 48px',
-        width: '100%',
-        alignItems: 'center',
-        gap: '64px',
-      }}>
-        {/* Left */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-            fontSize: '12px', fontWeight: 500, color: '#2563eb',
-            letterSpacing: '0.08em', textTransform: 'uppercase',
-          }}>
-            <span style={{
-              width: '6px', height: '6px',
-              background: '#2563eb', borderRadius: '50%',
-              display: 'inline-block',
-            }} />
-            IFRS Campus Sertão
-          </div>
-
-          <h1 style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: 'clamp(48px, 6vw, 68px)',
-            fontWeight: 800,
-            lineHeight: 1.0,
-            letterSpacing: '-0.03em',
-            color: '#0f172a',
-            margin: 0,
-          }}>
-            Bolsas<br />
-            <span style={{ color: '#1d4ed8' }}>acadêmicas</span><br />
-            sem burocracia
-          </h1>
-
-          <p style={{
-            fontSize: '17px', color: '#64748b',
-            lineHeight: 1.7, maxWidth: '440px', margin: 0,
-          }}>
-            Plataforma oficial de gestão de bolsas de Ensino, Pesquisa e Extensão.
-            Encontre projetos, candidate-se e acompanhe tudo em um só lugar.
-          </p>
-
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <Link href="/cadastro" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '8px',
-              background: '#1d4ed8', color: 'white',
-              fontSize: '15px', fontWeight: 500,
-              padding: '13px 28px', borderRadius: '10px',
-              textDecoration: 'none',
-            }}>
-              Começar agora
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </Link>
-            <Link href="/login" style={{
-              display: 'inline-flex', alignItems: 'center',
-              background: 'white', color: '#334155',
-              border: '1.5px solid #e2e8f0',
-              fontSize: '15px', fontWeight: 500,
-              padding: '13px 28px', borderRadius: '10px',
-              textDecoration: 'none',
-            }}>
-              Já tenho conta
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div style={{
-            display: 'flex', gap: '32px',
-            paddingTop: '24px',
-            borderTop: '1px solid #f1f5f9',
-          }}>
-            {[
-              { value: '3', label: 'Modalidades' },
-              { value: '100%', label: 'Gratuito' },
-              { value: 'IFRS', label: 'Institucional' },
-            ].map(s => (
-              <div key={s.label}>
-                <div style={{
-                  fontFamily: "'Syne', sans-serif",
-                  fontSize: '24px', fontWeight: 700, color: '#0f172a',
-                }}>{s.value}</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
+      {/* ── Hero ── */}
+      <main className="max-w-6xl mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28">
+        {/* Badge */}
+        <div className="flex justify-center mb-8">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 border border-slate-200 rounded-full text-xs font-medium text-slate-500 bg-white">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
+            IFRS CAMPUS SERTÃO
+          </span>
         </div>
 
-        {/* Right — Category cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Título — clamp responsivo, sem overflow */}
+        <h1
+          className="text-center font-bold leading-tight tracking-tight text-slate-900 mb-6"
+          style={{
+            fontFamily: 'Syne, sans-serif',
+            fontSize: 'clamp(2rem, 8vw, 4rem)',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Bolsas <span className="text-blue-700">acadêmicas</span>
+          <br />sem burocracia
+        </h1>
+
+        {/* Subtítulo */}
+        <p className="text-center text-slate-500 text-sm sm:text-base max-w-md mx-auto leading-relaxed mb-10">
+          Plataforma oficial de gestão de bolsas de Ensino, Pesquisa e Extensão.
+          Encontre projetos, candidate-se e acompanhe tudo em um só lugar.
+        </p>
+
+        {/* CTAs */}
+        <div className="flex flex-wrap gap-3 justify-center mb-16">
+          <Link
+            href="/cadastro"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+          >
+            Começar agora →
+          </Link>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 hover:border-slate-400 text-slate-700 text-sm font-medium rounded-xl transition-colors"
+          >
+            Já tenho conta
+          </Link>
+        </div>
+
+        {/* Stats */}
+        <div className="flex justify-center gap-10 sm:gap-16 mb-20 text-center">
           {[
-            {
-              icon: '🔬', bg: '#eff6ff',
-              title: 'Pesquisa', desc: 'Iniciação científica e projetos aplicados',
-              badge: 'IC / PIBIC', badgeBg: '#dbeafe', badgeColor: '#1d4ed8',
-            },
-            {
-              icon: '📚', bg: '#f0fdf4',
-              title: 'Ensino', desc: 'Monitoria e apoio pedagógico',
-              badge: 'Monitoria', badgeBg: '#dcfce7', badgeColor: '#15803d',
-            },
-            {
-              icon: '🤝', bg: '#fff7ed',
-              title: 'Extensão', desc: 'Impacto social e comunidade',
-              badge: 'PIBEX', badgeBg: '#fed7aa', badgeColor: '#c2410c',
-            },
-          ].map(c => (
-            <div key={c.title} style={{
-              background: 'white',
-              border: '1px solid #e2e8f0',
-              borderRadius: '16px',
-              padding: '20px 24px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-            }}>
-              <div style={{
-                width: '44px', height: '44px',
-                borderRadius: '12px',
-                background: c.bg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '22px', flexShrink: 0,
-              }}>
-                {c.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '15px', fontWeight: 600, color: '#1e293b' }}>{c.title}</div>
-                <div style={{ fontSize: '13px', color: '#94a3b8', marginTop: '3px' }}>{c.desc}</div>
-              </div>
-              <span style={{
-                fontSize: '11px', fontWeight: 600,
-                padding: '3px 10px', borderRadius: '999px',
-                background: c.badgeBg, color: c.badgeColor,
-                whiteSpace: 'nowrap',
-              }}>
-                {c.badge}
-              </span>
+            { value: '3', label: 'Modalidades' },
+            { value: '100%', label: 'Gratuito' },
+            { value: 'IFRS', label: 'Institucional' },
+          ].map(({ value, label }) => (
+            <div key={label}>
+              <p
+                className="font-bold text-slate-900 text-xl sm:text-2xl"
+                style={{ fontFamily: 'Syne, sans-serif' }}
+              >
+                {value}
+              </p>
+              <p className="text-slate-400 text-xs mt-1">{label}</p>
             </div>
           ))}
         </div>
-      </section>
 
-      {/* Footer */}
-      <footer style={{
-        textAlign: 'center',
-        padding: '24px 48px',
-        borderTop: '1px solid #f1f5f9',
-        fontSize: '13px',
-        color: '#cbd5e1',
-      }}>
-        © 2026 Instituto Federal do Rio Grande do Sul — Campus Sertão · LeARN
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            {
+              icon: '🔬',
+              iconBg: 'bg-green-50',
+              title: 'Pesquisa',
+              badge: 'IC / PIBIC',
+              badgeColor: 'bg-blue-100 text-blue-700',
+              desc: 'Iniciação científica e projetos aplicados',
+            },
+            {
+              icon: '📚',
+              iconBg: 'bg-blue-50',
+              title: 'Ensino',
+              badge: 'Monitoria',
+              badgeColor: 'bg-green-100 text-green-700',
+              desc: 'Monitoria e apoio pedagógico',
+            },
+            {
+              icon: '🤝',
+              iconBg: 'bg-orange-50',
+              title: 'Extensão',
+              badge: 'PIBEX',
+              badgeColor: 'bg-orange-100 text-orange-700',
+              desc: 'Impacto social e comunidade',
+            },
+          ].map(({ icon, iconBg, title, badge, badgeColor, desc }) => (
+            <div
+              key={title}
+              className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className={`w-9 h-9 ${iconBg} rounded-lg flex items-center justify-center text-base mb-3`}>
+                {icon}
+              </div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <h3
+                  className="font-semibold text-slate-900 text-sm"
+                  style={{ fontFamily: 'Syne, sans-serif' }}
+                >
+                  {title}
+                </h3>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeColor}`}>
+                  {badge}
+                </span>
+              </div>
+              <p className="text-slate-500 text-xs leading-relaxed">{desc}</p>
+            </div>
+          ))}
+        </div>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center">
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} Instituto Federal do Rio Grande do Sul — Campus Sertão · LeARN
+          </p>
+        </div>
       </footer>
     </div>
   )
